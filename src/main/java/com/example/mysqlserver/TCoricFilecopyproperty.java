@@ -2,12 +2,14 @@ package com.example.mysqlserver;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.Instant;
 
 @Entity
 @Table(name = "t_coric_FileCopyProperties")
 public class TCoricFilecopyproperty {
+    @Id
     @Column(name = "coric_ext_id", nullable = false)
     private Integer coricExtId;
 

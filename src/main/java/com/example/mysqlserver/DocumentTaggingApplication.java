@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MysqlserverApplication {
+public class DocumentTaggingApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MysqlserverApplication.class, args);
+		SpringApplication.run(DocumentTaggingApplication.class, args);
 	}
 
 }

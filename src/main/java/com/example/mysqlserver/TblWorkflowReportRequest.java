@@ -2,6 +2,7 @@ package com.example.mysqlserver;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "tblWorkflowReportRequest")
 public class TblWorkflowReportRequest {
+    @Id
     @Column(name = "WorkflowReportRequestID", nullable = false)
     private Long workflowReportRequestID;
 
