@@ -1,0 +1,12 @@
+@startuml
+
+title "Document tagging with Investor Id"
+
+actor       Actor       as User
+participant App         as App
+
+User -> App : post /tagDocument request \n with pdf document & mapping sheet
+App ->  App : read the pdf page by page\nread the page title & find the inverstor id from mapping sheet
+App ->  App : modify the document to add investor id on all pages
+App -> User : returns the tagged document as response
+@enduml
