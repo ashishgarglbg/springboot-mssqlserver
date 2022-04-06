@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: Garashis_SQLLogin_1
+    url: jdbc:sqlserver://garashisdb.mssql.somee.com;packet size=4096;user id=Garashis_SQLLogin_1;pwd=teq4bl1ulx;data source=garashisdb.mssql.somee.com;persist security info=False;initial catalog=garashisdb;trustServerCertificate=true;
+    password: teq4bl1ulx
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServer2012Dialect
+        format_sql: 'true'
+    hibernate:
+      ddl-auto: update
+    show-sql: 'true'
+server:
+  error:
+    include-message: ALWAYS
+    include-binding-errors: ALWAYS
+    include-stacktrace: ON_PARAM
+    include-exception: false
