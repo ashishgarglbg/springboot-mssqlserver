@@ -1,4 +1,8 @@
 spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: Garashis_SQLLogin_1
@@ -13,8 +17,6 @@ spring:
       ddl-auto: update
     show-sql: 'true'
 server:
-  error:
-    include-message: ALWAYS
-    include-binding-errors: ALWAYS
-    include-stacktrace: ON_PARAM
-    include-exception: false
+  servlet:
+    context-path: /documentTagging/v1.0
+  port: '8080'
