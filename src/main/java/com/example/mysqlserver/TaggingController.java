@@ -15,11 +15,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 //@RestController
 @Controller
 public class TaggingController {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdHHmmss");
 
     private final TaggingService taggingService;
 
@@ -33,14 +37,16 @@ public class TaggingController {
     }
 
     @PostMapping(value = "/tagDocument", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_PDF_VALUE)
-    public Object tagDocument(@RequestPart("document") MultipartFile document, @RequestPart("mapping") MultipartFile mapping, RedirectAttributes attributes) throws IOException {
+    public Object tagDocument(@RequestPart("document") MultipartFile document,
+                              @RequestPart("mapping") MultipartFile mapping,
+                              RedirectAttributes attributes) throws IOException {
         boolean isError = false;
         if (document.isEmpty()) {
             attributes.addFlashAttribute("documentError", "Please select a report to tag");
             isError = true;
         }
         if (mapping.isEmpty()) {
-            attributes.addFlashAttribute("mappingError", "Please select a mapping to tag");
+            attributes.addFlashAttribute("mappingError", "Please select a mapping sheet");
             isError = true;
         }
         if (isError) {
@@ -55,17 +61,14 @@ public class TaggingController {
 
         //Closing the document
         pdDocument.close();
-
+        String filename = document.getOriginalFilename().split("\\.")[0] + "_" + LocalDateTime.now().format(formatter)+ ".pdf";
         var headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=TaggedDocument.pdf");
-
-
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
         return ResponseEntity
                 .ok()
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(new InputStreamResource(in));
+                .body(new InputStreamResource(new ByteArrayInputStream(out.toByteArray())));
     }
 }
