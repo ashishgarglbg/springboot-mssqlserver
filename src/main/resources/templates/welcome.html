@@ -12,6 +12,7 @@
 <main role="main" class="container">
     <div>
         <h2> Upload Report and Mapping document to tag with investor id </h2>
+
         <form method="post" th:action="@{/tagDocument}" enctype="multipart/form-data">
             <table>
                 <tr>
@@ -27,7 +28,7 @@
                 <tr>
                     <td></td>
                     <td><input type="submit" value="Tag Document"/></td>
-                    <td></td>
+                    <td th:if="${error}" th:text="${error}"></td>
                 </tr>
             </table>
         </form>
