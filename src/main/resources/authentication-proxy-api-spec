@@ -1,0 +1,221 @@
+openapi: 3.0.9
+info:
+  title: Authentication Proxy API Specification
+  description: |
+    API Specification for Apigee proxy for Authentication methods list
+  version: 1.0.0
+servers:
+  - url: https://{hostname}:{port}/iau-authentication-proxy-service/v1.0
+    variables:
+      hostname:
+        default: localhost
+      port:
+        enum:
+          - '443'
+          - '8443'
+        default: '443'
+  - url: http://{hostname}:{port}/iau-authentication-proxy-service/v1.0
+    variables:
+      hostname:
+        default: localhost
+      port:
+        enum:
+          - '80'
+        default: '80'
+paths:
+  /login:
+    get:
+      description: It returns authentication methods in response.
+      summary: Returns list of next authentication methods.
+      tags:
+        - AuthenticationMethods
+      operationId: authenticationMethods
+      parameters:
+        - name: x-lbg-client-id
+          in: header
+          description: client id
+          required: true
+          schema:
+            type: string
+            example: LBG
+        - name: x-lbg-client-secret
+          in: header
+          description: client secret.
+          required: true
+          schema:
+            type: string
+            example: ABcdef34567YYuz
+        - name: x-lbg-org
+          in: header
+          description: The name of the organisation e.g LBG
+          required: true
+          schema:
+            type: string
+            example: Blah12334567UUbcdfrt
+        - name: x-lbg-brand
+          in: header
+          description: The brand of the channel
+          required: true
+          schema:
+            type: string
+            enum:
+              - BOS
+              - MBNA
+              - LTB
+              - HFX
+        - name: x-lbg-session-id
+          in: header
+          description: Unique GUID representing the authentication journey
+          required: true
+          schema:
+            type: string
+            example: e08ba5dc-cf43-449b-ba65-de3333041604
+        - name: x-lbg-event-type
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [LOGIN, STEPUP]
+          description: The authentication journey type
+          example: LOGIN
+        - name: x-lbg-authn-id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: jwt
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvdGsiOiJ...
+      responses:
+        '200':
+          description: If the authorization server is able to authenticate the user and the client, it returns an HTTP 200 response with the authorization code appended to the redirection URL.
+          headers:
+            Cache-Control:
+              description: Describes how long this response can be cached
+              schema:
+                type: string
+                default: max-age=0,no-cache,no-store
+            X-Frame-Options:
+              description: Prevent this request from being loaded in any iframes
+              schema:
+                type: string
+                default: DENY
+            x-lbg-txn-correlation-id:
+              description: The transaction correlation identifier
+              schema:
+                type: string
+                pattern: ^[^*]+$
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authenticationMethodsResponse'
+        '400':
+          $ref: '#/components/responses/400InvalidRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+  
+components:
+  responses:
+    400InvalidRequest:
+      description: invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    401Unauthorized:
+      description: unauthorized to execute the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  schemas:
+    Errors:
+      title: Errors
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+      required:
+        - errors
+    ErrorResponse:
+      title: Error
+      type: object
+      properties :
+        code:
+          type: string
+          example: IAU_AUTHN_APIGEE_ERR_001
+          description: Custom code defined by the IAU lab
+        reasonCode:
+          type: string
+          example: missing mandatory input
+          description: reason for error
+        message:
+          maxLength: 250
+          type: string
+          example: username is missing in the request
+          description: custom message associated with the error
+        authStatus:
+          type: string
+          example: PROVIDED_TOKEN_ERROR
+          description: The technical error associated
+      required:
+        - code
+        - reasonCode
+        - message
+        - authStatus
+          
+    AuthenticationId:
+      type: string
+      format: jwt
+      example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvdGsiOiJ...
+      
+    Warnings:
+      title: Warnings
+      type: array
+      description: situations where an API request is processed successfully, however the processing was done with warnings
+      items:
+        $ref: '#/components/schemas/Warning'
+      required:
+        - errors
+    Warning:
+      title: Warning
+      type: object
+      properties :
+        code:
+          type: string
+          example: 12345
+          description: Error code associated with the business warning
+        message:
+          type: string
+          example: Non-mandatory reference string value 1234567890 truncated to 5 characters
+          description: Description associated with the business warning
+      required:
+        - code
+        - message
+    authenticationMethodsResponse:
+      type: object
+      properties:
+        authenticationId:
+          $ref: '#/components/schemas/AuthenticationId'
+        authenticationMethods:
+          $ref: '#/components/schemas/authenticationMethods'
+        warnings:
+          $ref: '#/components/schemas/Warnings'
+    authenticationMethods:
+      title: AuthenticationMethods
+      example:
+        - USERNAME
+        - PASSWORD
+      type: array
+      items:
+        type: string
+        maxLength: 20
+  securitySchemes:
+    zero_trust_token:
+      type: http
+      description: JWT authorization header for zero trust security
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - zero_trust_token: []
