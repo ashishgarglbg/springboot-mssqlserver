@@ -154,7 +154,7 @@ components:
                                         maxLength: 250
                                         type: string
                                         example: username is missing in the request
-                                                description: custom message associated with the error
+                                        description: custom message associated with the error
                                 authStatus:
                                         type: string
                                         example: PROVIDED_TOKEN_ERROR
