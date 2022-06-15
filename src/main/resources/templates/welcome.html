@@ -6,28 +6,47 @@
 
     <title>Document Tagging Application</title>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
+<script>
 
+ function submitAndBack(formId) {
+    let formDoc = document.getElementById(formId);
+    formDoc.submit();
+    sleep(1000).then(function() {
+        location.reload();
+    });
+}
+
+function sleep(milliseconds) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, milliseconds);
+    });
+}
+
+</script>
 </head>
 <body>
 <main role="main" class="container">
+    <img style="background-size: 100%;" th:src="@{/images/banner.gif}" width="100%"/>
     <div>
-        <h2> Upload Report and Mapping document to tag with investor id </h2>
+        <h2> Document Tagging Application </h2>
+        <h3> Upload the report and the mapping document to tag with investor id </h3>
 
-        <form method="post" th:action="@{/tagDocument}" enctype="multipart/form-data">
+        <form method="post" th:action="@{/tagDocument}" enctype="multipart/form-data" id="myForm">
             <table>
                 <tr>
                     <td>Report to tag:</td>
-                    <td><input type="file" name="document"/></td>
+                    <td><input type="file" name="document" title="Choose report" accept="application/pdf"/></td>
                     <td th:if="${documentError}" th:text="${documentError}"></td>
                 </tr>
                 <tr>
                     <td>Mapping document:</td>
-                    <td><input type="file" name="mapping"/></td>
+                    <td><input type="file" name="mapping" title="Choose mapping"
+                               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/></td>
                     <td th:if="${mappingError}" th:text="${mappingError}"></td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td><input type="submit" value="Tag Document"/></td>
+                    <td><input type="button" value="Tag Document" onclick="submitAndBack('myForm')"/></td>
                     <td th:if="${error}" th:text="${error}"></td>
                 </tr>
             </table>
