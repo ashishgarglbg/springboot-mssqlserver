@@ -6,6 +6,73 @@
 
     <title>Document Tagging Application</title>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.0.js}"></script>
+
+    <script>
+         // jQuery ajax form submit example, runs when form is submitted
+         $(document).ready(function() {
+            $("#but_upload").click(function() {
+
+                var fd = new FormData();
+                var documents = $('#document')[0].files;
+                var mappings = $('#mapping')[0].files;
+                //alert(documents[0]);
+                //alert(mappings[0]);
+                // Check file selected or not
+                if (documents.length > 0 && mappings.length > 0) {
+                    fd.append('document', documents[0]);
+                    fd.append('mapping', mappings[0]);
+                 }
+                    $.ajax({
+                        url: '/documentTagging/v1.0/tagDocument',
+                        type: 'post',
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        success: function(response, status, xhr){
+                            var ct = xhr.getResponseHeader("content-type") || "";
+
+                            if (ct.indexOf('html') > -1) {
+                              $("html").html(response);
+                            } if (ct.indexOf('pdf') > -1) {
+                                var ctd = xhr.getResponseHeader("Content-Disposition") || "";
+                                let i = ctd.indexOf("filename=");
+                                alert(i);
+                                alert(i + "filename=".length);
+
+                                let filename = ctd.substring(i + "filename=".length);
+                                alert(filename);
+
+                                //Convert the Byte Data to BLOB object.
+                                var blob = new Blob([response], {
+                                    type: "application/pdf"
+                                });
+
+                                var file = new File([blob], filename);
+                                //Check the Browser type and download the File.
+                                var isIE = false || !!document.documentMode;
+                                if (isIE) {
+                                    window.navigator.msSaveBlob(blob, filename);
+                                } else {
+                                    var url = window.URL || window.webkitURL;
+                                    link = url.createObjectURL(file);
+                                    var a = $("<a />");
+                                    a.attr("download", filename);
+                                    a.attr("href", link);
+                                    $("body").append(a);
+                                    a[0].click();
+                                    $("body").remove(a);
+                                }
+                            }
+                        },
+                    });
+                //}
+
+            });
+        });
+    </script>
+<!--
+
 <script>
 
  function submitAndBack(formId) {
@@ -23,6 +90,7 @@ function sleep(milliseconds) {
 }
 
 </script>
+-->
 </head>
 <body>
 <main role="main" class="container">
@@ -35,18 +103,19 @@ function sleep(milliseconds) {
             <table>
                 <tr>
                     <td>Report to tag:</td>
-                    <td><input type="file" name="document" title="Choose report" accept="application/pdf"/></td>
+                    <td><input type="file" name="document" id="document" title="Choose report" accept="application/pdf"/></td>
                     <td th:if="${documentError}" th:text="${documentError}"></td>
                 </tr>
                 <tr>
                     <td>Mapping document:</td>
-                    <td><input type="file" name="mapping" title="Choose mapping"
+                    <td><input type="file" name="mapping" id="mapping" title="Choose mapping"
                                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/></td>
                     <td th:if="${mappingError}" th:text="${mappingError}"></td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td><input type="button" value="Tag Document" onclick="submitAndBack('myForm')"/></td>
+                    <!--td><input type="button" value="Tag Document" onclick="submitAndBack('myForm')"/></td-->
+                    <td><input type="button" value="Tag Document" id="but_upload"/></td>
                     <td th:if="${error}" th:text="${error}"></td>
                 </tr>
             </table>
