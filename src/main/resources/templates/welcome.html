@@ -6,43 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Document Tagging Application</title>
     <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.js}"></script>
     <script>
 		// jQuery ajax form submit example, runs when form is submitted
 		$(document).ready(function() {
 			$("#but_upload").click(function() {
-				var fd = new FormData();
-				var documents = $('#document')[0].files;
-				var mappings = $('#mapping')[0].files;
-				// Check file selected or not
-				if(documents.length > 0 && mappings.length > 0) {
-					fd.append('document', documents[0]);
-					fd.append('mapping', mappings[0]);
-				}
-				$.ajax({
-					url: '/documentTagging/v1.0/tagDocument',
-					xhrFields: {
-						responseType: 'blob',
-					},
-					type: 'post',
-					data: fd,
-					contentType: false,
-					processData: false,
-					error: function (jqXHR, textStatus, errorThrown) { alert('error') },
-					success: function(response, status, xhr) {
-					    //alert(response.dataTypes);
-						var ct = xhr.getResponseHeader("content-type") || "";
-						//alert(ct);
-						if(ct.indexOf('html') > -1) {
-						    alert("its html");
-							$("html").html(response);
+
+                var xhr = new XMLHttpRequest();
+                var fd = new FormData();
+                var documents = $('#document')[0].files;
+                var mappings = $('#mapping')[0].files;
+
+                // Check file selected or not
+                if(documents.length > 0 && mappings.length > 0) {
+                    fd.append('document', documents[0]);
+                    fd.append('mapping', mappings[0]);
+                }
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 2 && this.status == 200) {
+                    //if (this.status == 200) {
+                        var ct = xhr.getResponseHeader('Content-Type');
+                        //alert(ct);
+                        if(ct.indexOf('html') > -1) {
+						   // alert("its html");
+							xhr.responseType = 'text';
 						} if(ct.indexOf('octet-stream') > -1) {
+						   // alert("its html");
+							xhr.responseType = 'blob';
+						}
+                    }
+                };
+
+                xhr.onload = function() {
+                    if (xhr.status == 200) {
+
+                        let responseObj = xhr.response;
+                        var ct = xhr.getResponseHeader('Content-Type');
+                        //alert(ct);
+                        if(ct.indexOf('html') > -1) {
+						    //alert("its html");
+							document.open();
+                            document.write(responseObj);
+                            document.close();
+						}
+
+                        if(ct.indexOf('octet-stream') > -1) {
 							//if (ct.indexOf('pdf') > -1) {
 							var ctd = xhr.getResponseHeader("Content-Disposition") || "";
 							let i = ctd.indexOf("filename=");
 							let filename = ctd.substring(i + "filename=".length);
 							//Convert the Byte Data to BLOB object.
-							var blob = new Blob([response], {
+							var blob = new Blob([responseObj], {
 								type: "application/pdf"
 							});
 							var file = new File([blob], filename);
@@ -59,14 +74,20 @@
 								$("body").append(a);
 								a[0].click();
 								$("body").remove(a);
+								location.reload();
 							}
 						}
-					},
-				});
+					}
+                };
+
+                xhr.open('POST', '/documentTagging/v1.0/tagDocument', true);
+                //xhr.setRequestHeader("Content-Type","multipart/form-data");
+                $('#but_upload').prop("value", 'Processing ...');
+                xhr.send(fd);
 			});
 		});
     </script>
-    <!--
+
 <script>
 
 function submitAndBack(formId) {
@@ -84,7 +105,7 @@ function sleep(milliseconds) {
 }
 
 </script>
--->
+
 </head>
 
 <body>
@@ -107,11 +128,12 @@ function sleep(milliseconds) {
                 </tr>
                 <tr>
                     <td></td>
-                    <!-- td><input type="button" value="Tag Document" onclick="submitAndBack('myForm')"/></td -->
-                    <td><input type="button" value="Tag Document" id="but_upload" /></td>
+                    <td><input type="button" value="Tag Document" onclick="submitAndBack('myForm')"/></td>
+                    <!-- td><input type="button" value="Tag Document" id="but_upload" /></td -->
                     <td th:if="${error}" th:text="${error}"></td>
                 </tr>
             </table>
+            <input type="button" value="Tag Document" id="but_upload" />
         </form>
     </div>
 </main>
